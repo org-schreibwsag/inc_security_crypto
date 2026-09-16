@@ -308,6 +308,23 @@ filegroup(
     urls = ["https://github.com/softhsm/SoftHSMv2/archive/refs/tags/2.7.0.tar.gz"],
 )
 
+# *******************************************************************************
+# NXP pkcs11-hse
+# *******************************************************************************
+
+http_archive(
+    name = "nxp_pkcs11_hse",
+    build_file_content = """
+# Root BUILD file for the archive. We define subpackages manually.
+exports_files(["libpkcs/include/pkcs11-unix.h"])
+exports_files(["libpkcs/redist/pkcs11.h"])
+exports_files(["libpkcs/redist/pkcs11f.h"])
+exports_files(["libpkcs/redist/pkcs11t.h"])
+""",
+    strip_prefix = "pkcs11-hse-bsp46.0",
+    urls = ["https://github.com/nxp-auto-linux/pkcs11-hse/archive/refs/tags/bsp46.0.tar.gz"],
+)
+
 # ===============================================================================
 # S C O R E   M O D U L E S
 # ===============================================================================

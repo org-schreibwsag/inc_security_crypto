@@ -84,6 +84,7 @@ class Pkcs11ProviderHashTest : public ::testing::Test
   protected:
     void SetUp() override
     {
+#ifndef NO_SOFTHSM_SETUP
         // TODO: Check if we can use SetupTestSuite for the SoftHSM environment setup, since it is shared across all
         // tests in this suite. If we do that, we can avoid repeating the setup for each test and potentially speed up
         // the test execution. However, we need to ensure that the token state is properly isolated between tests, which
@@ -122,7 +123,6 @@ class Pkcs11ProviderHashTest : public ::testing::Test
         // CKR_OK is fine too (first test or fresh process).
         ASSERT_TRUE((rv == CKR_OK) || (rv == CKR_CRYPTOKI_ALREADY_INITIALIZED));
 
-#ifndef USE_RUST_PKCS11
         // Get first available slot (without token).
         CK_ULONG slotCount{0U};
         rv = fl->C_GetSlotList(CK_FALSE, nullptr, &slotCount);
@@ -163,7 +163,7 @@ class Pkcs11ProviderHashTest : public ::testing::Test
         ASSERT_EQ(rv, CKR_OK);
         rv = fl->C_CloseSession(tmpSession);
         ASSERT_EQ(rv, CKR_OK);
-#endif // USE_RUST_PKCS11
+#endif
 
         // NOTE: Do NOT call C_Finalize here — the provider manages module lifecycle.
         // The provider's Pkcs11Module will finalize when it's destroyed.
@@ -173,6 +173,12 @@ class Pkcs11ProviderHashTest : public ::testing::Test
         // Use kSlotIdAutoDetect — Initialize() resolves slot via FindSlotByToken.
         // cfg.slotId is kSlotIdAutoDetect by default.
         cfg.tokenLabel = "SoftHSM";
+#ifdef TOKEN_CRYPTOKI
+        cfg.tokenLabel = "Cryptoki Token";
+#endif
+#ifdef TOKEN_HSE
+        cfg.tokenLabel = "NXP-HSE-Token";
+#endif
         cfg.userPin = "1234";
         cfg.providerName = "SOFTHSM";  // SOFTHSM provider name
         // Override session limits to allow concurrent handler creation.
